@@ -4,12 +4,14 @@ import BlogPost from '@/components/BlogPost';
 import CategoryFilter from '@/components/CategoryFilter';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { useContentStore } from '@/hooks/useContentStore';
 
 const Articles = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { content } = useContentStore();
 
-  const allPosts = [
+  const defaultPosts = [
     {
       id: 1,
       title: "The Future of Artificial Intelligence in 2025",
@@ -89,6 +91,28 @@ const Articles = () => {
       author: "Lisa Park"
     }
   ];
+
+  // Convert uploaded content to blog post format
+  const uploadedPosts = content.map(item => ({
+    id: parseInt(item.id),
+    title: item.title,
+    description: item.description,
+    category: item.category,
+    date: item.date,
+    readTime: item.readTime,
+    views: item.views,
+    likes: item.likes,
+    comments: item.comments,
+    image: item.fileType?.startsWith('image/') ? item.fileUrl : "photo-1487058792275-0ad4aaf24ca7",
+    author: item.author,
+    isUploaded: true,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileType: item.fileType
+  }));
+
+  // Combine uploaded content with default posts
+  const allPosts = [...uploadedPosts, ...defaultPosts];
 
   const categories = [...new Set(allPosts.map(post => post.category))];
 

@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload as UploadIcon, FileText, Image, Video, File } from 'lucide-react';
+import { Upload as UploadIcon, FileText, Image, Video, File, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useContentStore } from '@/hooks/useContentStore';
 
 const Upload = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -12,24 +14,92 @@ const Upload = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Technology');
   const [tags, setTags] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  const { toast } = useToast();
+  const { addContent } = useContentStore();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Check file size (50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select a file smaller than 50MB",
+          variant: "destructive"
+        });
+        return;
+      }
       setSelectedFile(file);
+      setUploadSuccess(false);
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // TODO: Implement actual upload functionality
-    console.log('Upload submitted:', {
-      file: selectedFile,
-      title,
-      description,
-      category,
-      tags
-    });
+    
+    if (!selectedFile || !title || !description) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields and select a file",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Create a file URL for viewing
+      const fileUrl = URL.createObjectURL(selectedFile);
+
+      // Add content to store
+      const newContent = addContent({
+        title,
+        description,
+        category,
+        tags,
+        fileName: selectedFile.name,
+        fileType: selectedFile.type,
+        fileSize: selectedFile.size,
+        fileUrl,
+        author: 'Admin'
+      });
+
+      console.log('Content uploaded successfully:', newContent);
+
+      toast({
+        title: "Upload successful!",
+        description: "Your content has been uploaded and is now available in the articles section.",
+      });
+
+      setUploadSuccess(true);
+      
+      // Reset form
+      setSelectedFile(null);
+      setTitle('');
+      setDescription('');
+      setCategory('Technology');
+      setTags('');
+      
+      // Reset file input
+      const fileInput = document.getElementById('file') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your content. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const getFileIcon = (fileType: string) => {
@@ -51,6 +121,17 @@ const Upload = () => {
             Share your futuristic insights, research papers, and documents with the community
           </p>
         </div>
+
+        {uploadSuccess && (
+          <div className="mb-8 p-4 bg-cyber-green/10 border border-cyber-green/30 rounded-lg">
+            <div className="flex items-center">
+              <CheckCircle className="w-5 h-5 text-cyber-green mr-2" />
+              <p className="text-cyber-green font-exo">
+                Content uploaded successfully! You can now view it in the Articles section.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload Form */}
@@ -172,10 +253,19 @@ const Upload = () => {
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-cyber-blue to-cyber-purple hover:from-cyber-blue/80 hover:to-cyber-purple/80 text-white font-exo font-medium py-2 px-4 rounded-lg transition-all duration-300"
-                  disabled={!selectedFile || !title || !description}
+                  disabled={!selectedFile || !title || !description || isUploading}
                 >
-                  <UploadIcon className="w-4 h-4 mr-2" />
-                  Upload Content
+                  {isUploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <UploadIcon className="w-4 h-4 mr-2" />
+                      Upload Content
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>

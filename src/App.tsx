@@ -8,6 +8,7 @@ import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import Index from "./pages/Index";
 import Articles from "./pages/Articles";
+import ArticleDetail from "./pages/ArticleDetail";
 import Categories from "./pages/Categories";
 import Upload from "./pages/Upload";
 import About from "./pages/About";
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/articles" element={<Articles />} />
+            <Route path="/article/:id" element={<ArticleDetail />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/upload" element={<Upload />} />
             <Route path="/about" element={<About />} />

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,20 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Futuristic theme colors
+				cyber: {
+					blue: '#00f5ff',
+					purple: '#a855f7',
+					green: '#32cd32',
+					pink: '#ff1493',
+					dark: '#0a0a0a',
+					darker: '#050505'
 				}
+			},
+			fontFamily: {
+				'orbitron': ['Orbitron', 'monospace'],
+				'exo': ['Exo 2', 'sans-serif']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +98,38 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'glow-pulse': {
+					'0%, 100%': {
+						boxShadow: '0 0 5px theme(colors.cyber.blue), 0 0 20px theme(colors.cyber.blue), 0 0 35px theme(colors.cyber.blue)'
+					},
+					'50%': {
+						boxShadow: '0 0 10px theme(colors.cyber.blue), 0 0 40px theme(colors.cyber.blue), 0 0 60px theme(colors.cyber.blue)'
+					}
+				},
+				'neon-flicker': {
+					'0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%': {
+						textShadow: '0 0 5px theme(colors.cyber.blue), 0 0 10px theme(colors.cyber.blue), 0 0 15px theme(colors.cyber.blue), 0 0 20px theme(colors.cyber.blue)'
+					},
+					'20%, 24%, 55%': {
+						textShadow: 'none'
+					}
+				},
+				'grid-move': {
+					'0%': {
+						transform: 'translate(0, 0)'
+					},
+					'100%': {
+						transform: 'translate(-50px, -50px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+				'neon-flicker': 'neon-flicker 1.5s infinite linear',
+				'grid-move': 'grid-move 20s ease-in-out infinite alternate'
 			}
 		}
 	},

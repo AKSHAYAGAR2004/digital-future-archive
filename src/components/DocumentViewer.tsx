@@ -13,6 +13,7 @@ interface DocumentViewerProps {
 
 const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewerProps) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/')) return <Image className="w-6 h-6" />;
@@ -21,39 +22,76 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
     return <File className="w-6 h-6" />;
   };
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    link.click();
+  };
+
   const renderViewer = () => {
     if (fileType.startsWith('image/')) {
       return (
-        <img
-          src={fileUrl}
-          alt={fileName}
-          className="max-w-full h-auto rounded-lg"
-          onLoad={() => setIsLoading(false)}
-        />
+        <div className="text-center">
+          <img
+            src={fileUrl}
+            alt={fileName}
+            className="max-w-full h-auto rounded-lg mx-auto"
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setLoadError(true);
+            }}
+          />
+        </div>
       );
     }
 
     if (fileType.startsWith('video/')) {
       return (
-        <video
-          controls
-          className="max-w-full h-auto rounded-lg"
-          onLoadedData={() => setIsLoading(false)}
-        >
-          <source src={fileUrl} type={fileType} />
-          Your browser does not support the video tag.
-        </video>
+        <div className="text-center">
+          <video
+            controls
+            className="max-w-full h-auto rounded-lg mx-auto"
+            onLoadedData={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setLoadError(true);
+            }}
+          >
+            <source src={fileUrl} type={fileType} />
+            Your browser does not support the video tag.
+          </video>
+        </div>
       );
     }
 
     if (fileType === 'application/pdf') {
       return (
-        <iframe
-          src={fileUrl}
-          className="w-full h-96 rounded-lg border border-cyber-blue/30"
-          onLoad={() => setIsLoading(false)}
-          title={fileName}
-        />
+        <div className="space-y-4">
+          <div className="text-center">
+            <iframe
+              src={`${fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+              className="w-full h-96 rounded-lg border border-cyber-blue/30"
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setIsLoading(false);
+                setLoadError(true);
+              }}
+              title={fileName}
+            />
+          </div>
+          <div className="text-center">
+            <Button
+              onClick={handleDownload}
+              className="cyber-button"
+              variant="outline"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </Button>
+          </div>
+        </div>
       );
     }
 
@@ -67,12 +105,7 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
           Preview not available for this file type
         </p>
         <Button
-          onClick={() => {
-            const link = document.createElement('a');
-            link.href = fileUrl;
-            link.download = fileName;
-            link.click();
-          }}
+          onClick={handleDownload}
           className="cyber-button"
         >
           <Download className="w-4 h-4 mr-2" />
@@ -90,16 +123,36 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
           <span className="ml-2">{fileName}</span>
         </CardTitle>
         <CardDescription className="font-exo">
-          {(fileSize / 1024 / 1024).toFixed(2)} MB
+          {(fileSize / 1024 / 1024).toFixed(2)} MB • {fileType}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading && (
+        {isLoading && !loadError && (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyber-blue"></div>
+            <span className="ml-2 text-muted-foreground">Loading document...</span>
           </div>
         )}
-        {renderViewer()}
+        
+        {loadError && (
+          <div className="text-center py-8">
+            <div className="flex justify-center mb-4">
+              {getFileIcon(fileType)}
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Unable to preview this document
+            </p>
+            <Button
+              onClick={handleDownload}
+              className="cyber-button"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download File
+            </Button>
+          </div>
+        )}
+        
+        {!loadError && renderViewer()}
       </CardContent>
     </Card>
   );

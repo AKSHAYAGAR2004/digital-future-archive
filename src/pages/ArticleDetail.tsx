@@ -14,6 +14,9 @@ const ArticleDetail = () => {
 
   const content = id ? getContentById(id) : null;
 
+  console.log('ArticleDetail - ID:', id);
+  console.log('ArticleDetail - Content:', content);
+
   if (!content) {
     return (
       <div className="min-h-screen py-8">

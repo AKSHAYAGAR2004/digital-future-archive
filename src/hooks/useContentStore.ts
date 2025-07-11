@@ -18,6 +18,7 @@ export interface UploadedContent {
   likes: number;
   comments: number;
   author: string;
+  content?: string; // Add optional content property
 }
 
 const CONTENT_STORAGE_KEY = 'uploaded_content';

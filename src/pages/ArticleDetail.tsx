@@ -234,7 +234,7 @@ As quantum computers become more stable and accessible, we can expect breakthrou
               fileSize={uploadedContent.fileSize}
             />
           </div>
-        ) : content.content ? (
+        ) : (content.content || (uploadedContent && uploadedContent.content)) ? (
           <Card className="cyber-card mb-8">
             <CardContent className="pt-6">
               <div className="prose prose-invert max-w-none">
@@ -242,7 +242,7 @@ As quantum computers become more stable and accessible, we can expect breakthrou
                   className="text-foreground leading-relaxed"
                   style={{ whiteSpace: 'pre-wrap' }}
                   dangerouslySetInnerHTML={{ 
-                    __html: content.content.replace(/\n/g, '<br/>').replace(/### /g, '<h3 class="text-xl font-orbitron text-cyber-purple mt-6 mb-3">').replace(/<\/h3>/g, '</h3>').replace(/## /g, '<h2 class="text-2xl font-orbitron text-cyber-blue mt-8 mb-4">').replace(/<\/h2>/g, '</h2>').replace(/# /g, '<h1 class="text-3xl font-orbitron text-cyber-green mt-8 mb-6">').replace(/<\/h1>/g, '</h1>')
+                    __html: (content.content || uploadedContent?.content || '').replace(/\n/g, '<br/>').replace(/### /g, '<h3 class="text-xl font-orbitron text-cyber-purple mt-6 mb-3">').replace(/<\/h3>/g, '</h3>').replace(/## /g, '<h2 class="text-2xl font-orbitron text-cyber-blue mt-8 mb-4">').replace(/<\/h2>/g, '</h2>').replace(/# /g, '<h1 class="text-3xl font-orbitron text-cyber-green mt-8 mb-6">').replace(/<\/h1>/g, '</h1>')
                   }}
                 />
               </div>

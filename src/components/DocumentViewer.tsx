@@ -36,7 +36,7 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
           <img
             src={fileUrl}
             alt={fileName}
-            className="max-w-full h-auto rounded-lg mx-auto"
+            className="max-w-full h-auto rounded-lg mx-auto shadow-lg"
             onLoad={() => setIsLoading(false)}
             onError={() => {
               setIsLoading(false);
@@ -52,7 +52,7 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
         <div className="text-center">
           <video
             controls
-            className="max-w-full h-auto rounded-lg mx-auto"
+            className="max-w-full h-auto rounded-lg mx-auto shadow-lg"
             onLoadedData={() => setIsLoading(false)}
             onError={() => {
               setIsLoading(false);
@@ -69,10 +69,10 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
     if (fileType === 'application/pdf') {
       return (
         <div className="space-y-4">
-          <div className="text-center">
+          <div className="w-full h-[600px] rounded-lg overflow-hidden border border-cyber-blue/30">
             <iframe
-              src={`${fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-              className="w-full h-96 rounded-lg border border-cyber-blue/30"
+              src={fileUrl}
+              className="w-full h-full"
               onLoad={() => setIsLoading(false)}
               onError={() => {
                 setIsLoading(false);
@@ -95,10 +95,39 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
       );
     }
 
+    if (fileType.startsWith('text/') || fileName.endsWith('.txt') || fileName.endsWith('.md')) {
+      return (
+        <div className="space-y-4">
+          <div className="bg-muted/50 rounded-lg p-6 border border-cyber-blue/30">
+            <iframe
+              src={fileUrl}
+              className="w-full h-96 bg-transparent"
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setIsLoading(false);
+                setLoadError(true);
+              }}
+              title={fileName}
+            />
+          </div>
+          <div className="text-center">
+            <Button
+              onClick={handleDownload}
+              className="cyber-button"
+              variant="outline"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download File
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     // For other file types, show download option
     return (
       <div className="text-center py-8">
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-4 text-cyber-blue">
           {getFileIcon(fileType)}
         </div>
         <p className="text-muted-foreground mb-4">
@@ -128,7 +157,7 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
       </CardHeader>
       <CardContent>
         {isLoading && !loadError && (
-          <div className="flex justify-center py-8">
+          <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyber-blue"></div>
             <span className="ml-2 text-muted-foreground">Loading document...</span>
           </div>
@@ -136,7 +165,7 @@ const DocumentViewer = ({ fileName, fileType, fileUrl, fileSize }: DocumentViewe
         
         {loadError && (
           <div className="text-center py-8">
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-4 text-cyber-blue">
               {getFileIcon(fileType)}
             </div>
             <p className="text-muted-foreground mb-4">

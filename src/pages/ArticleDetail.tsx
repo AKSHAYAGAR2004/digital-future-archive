@@ -1,16 +1,20 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContentStore } from '@/hooks/useContentStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Clock, Eye, Heart, MessageSquare, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Eye, Heart, MessageSquare, Share2, Trash2 } from 'lucide-react';
 import DocumentViewer from '@/components/DocumentViewer';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getContentById } = useContentStore();
+  const { getContentById, deleteContent } = useContentStore();
+  const { toast } = useToast();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Default articles with full content
   const defaultArticles = [
@@ -122,7 +126,6 @@ The quantum revolution is not just coming—it's already here, transforming how 
 
 As quantum computers become more stable and accessible, we can expect breakthroughs in fields ranging from materials science to artificial intelligence. The key will be developing quantum algorithms that can take advantage of quantum computing's unique capabilities.`
     }
-    // Add more default articles as needed...
   ];
 
   // Try to find content in uploaded content first, then in default articles
@@ -132,6 +135,17 @@ As quantum computers become more stable and accessible, we can expect breakthrou
 
   console.log('ArticleDetail - ID:', id);
   console.log('ArticleDetail - Content:', content);
+
+  const handleDelete = () => {
+    if (uploadedContent && id) {
+      deleteContent(id);
+      toast({
+        title: "Article Deleted",
+        description: "The article has been successfully deleted.",
+      });
+      navigate('/articles');
+    }
+  };
 
   if (!content) {
     return (
@@ -153,7 +167,7 @@ As quantum computers become more stable and accessible, we can expect breakthrou
     <div className="min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <Button
             onClick={() => navigate('/articles')}
             variant="ghost"
@@ -162,6 +176,34 @@ As quantum computers become more stable and accessible, we can expect breakthrou
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Articles
           </Button>
+          
+          {/* Delete Button - Only show for uploaded content */}
+          {uploadedContent && (
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Article
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Article</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete "{content.title}"? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleDelete}>
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         {/* Article Header */}

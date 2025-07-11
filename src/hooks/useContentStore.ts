@@ -58,6 +58,11 @@ export const useContentStore = () => {
     return newItem;
   };
 
+  const deleteContent = (id: string) => {
+    const updatedContent = content.filter(item => item.id !== id);
+    saveContent(updatedContent);
+  };
+
   const getContentById = (id: string) => {
     return content.find(item => item.id === id);
   };
@@ -65,6 +70,7 @@ export const useContentStore = () => {
   return {
     content,
     addContent,
+    deleteContent,
     getContentById,
   };
 };

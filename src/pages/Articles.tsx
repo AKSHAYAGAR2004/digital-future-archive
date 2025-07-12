@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import BlogPost from '@/components/BlogPost';
 import CategoryFilter from '@/components/CategoryFilter';
@@ -13,7 +12,7 @@ const Articles = () => {
 
   const defaultPosts = [
     {
-      id: 1,
+      id: "1",
       title: "The Future of Artificial Intelligence in 2025",
       description: "Exploring the next generation of AI technologies and their impact on society, from quantum computing to neural interfaces. We dive deep into machine learning algorithms, natural language processing, and the ethical implications of advanced AI systems.",
       category: "Technology",
@@ -42,7 +41,7 @@ As AI becomes more powerful, the development of robust ethical frameworks become
 The future of AI is not just about technological advancement, but about creating systems that enhance human capabilities while maintaining our core values and ethics.`
     },
     {
-      id: 2,
+      id: "2",
       title: "Quantum Computing: Breaking the Barriers",
       description: "A deep dive into quantum computing breakthroughs and their potential to revolutionize data processing, cryptography, and scientific research across multiple disciplines.",
       category: "Research",
@@ -78,7 +77,7 @@ This phenomenon allows quantum computers to amplify correct answers and cancel o
 The quantum revolution is not just coming—it's already here, transforming how we approach the most complex computational challenges.`
     },
     {
-      id: 3,
+      id: "3",
       title: "Cybersecurity in the Metaverse Era",
       description: "Understanding the new security challenges as we transition into virtual worlds and digital realities. Exploring privacy, identity protection, and data security in immersive environments.",
       category: "Security",
@@ -113,7 +112,7 @@ VR environments make social engineering attacks more convincing and harder to de
 The metaverse promises incredible opportunities, but only if we can navigate its security challenges successfully.`
     },
     {
-      id: 4,
+      id: "4",
       title: "Neural Interfaces: The Brain-Computer Revolution",
       description: "How brain-computer interfaces are changing the way we interact with technology and enhancing human capabilities. From medical applications to cognitive augmentation.",
       category: "Technology",
@@ -158,7 +157,7 @@ As we develop more sophisticated neural interfaces, we must consider:
 The brain-computer revolution is not just about technology—it's about redefining what it means to be human.`
     },
     {
-      id: 5,
+      id: "5",
       title: "Sustainable Tech: Green Computing Solutions",
       description: "Exploring environmentally friendly approaches to computing and data center management in the digital age. Carbon-neutral cloud computing and renewable energy integration.",
       category: "Research",
@@ -203,7 +202,7 @@ The ICT sector contributes about 4% of global greenhouse gas emissions, equivale
 Sustainable technology isn't just about environmental responsibility—it's about creating more efficient, cost-effective, and resilient computing systems. The future of tech is green, and the companies that embrace this reality will lead the next technological revolution.`
     },
     {
-      id: 6,
+      id: "6",
       title: "Blockchain Beyond Cryptocurrency",
       description: "Discovering innovative applications of blockchain technology in healthcare, supply chain, governance, and digital identity verification beyond financial applications.",
       category: "Technology",
@@ -256,7 +255,7 @@ While blockchain offers significant benefits, challenges include:
 The blockchain revolution extends far beyond digital currency—it's about reimagining trust in the digital age.`
     },
     {
-      id: 7,
+      id: "7",
       title: "The Rise of Edge Computing",
       description: "How edge computing is transforming data processing by bringing computation closer to data sources, reducing latency and improving real-time applications.",
       category: "Technology",
@@ -307,9 +306,9 @@ The edge computing revolution is making our digital world more responsive, effic
     }
   ];
 
-  // Convert uploaded content to blog post format
+  // Convert uploaded content to blog post format with consistent string IDs
   const uploadedPosts = content.map(item => ({
-    id: parseInt(item.id),
+    id: item.id, // Keep as string ID
     title: item.title,
     description: item.description,
     category: item.category,
@@ -325,7 +324,7 @@ The edge computing revolution is making our digital world more responsive, effic
     fileName: item.fileName,
     fileType: item.fileType,
     fileSize: item.fileSize,
-    content: item.description // Use description as content for uploaded items
+    content: item.content || item.description // Use content if available, fallback to description
   }));
 
   // Combine uploaded content with default posts
@@ -339,6 +338,10 @@ The edge computing revolution is making our digital world more responsive, effic
     const matchesCategory = selectedCategory === null || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  console.log('Articles - Uploaded content from store:', content);
+  console.log('Articles - Converted uploaded posts:', uploadedPosts);
+  console.log('Articles - All posts:', allPosts);
 
   return (
     <div className="min-h-screen py-8">

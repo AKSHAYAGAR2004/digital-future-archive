@@ -1,8 +1,19 @@
 
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
+  const handleExploreArticles = () => {
+    navigate('/articles');
+  };
+
+  const handleBrowseResearch = () => {
+    navigate('/articles?category=Research');
+  };
+
   return (
     <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
       {/* Animated Background Grid */}
@@ -33,7 +44,7 @@ const HeroSection = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button className="cyber-button group">
+          <Button className="cyber-button group" onClick={handleExploreArticles}>
             Explore Articles
             <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Button>
@@ -41,6 +52,7 @@ const HeroSection = () => {
           <Button 
             variant="outline" 
             className="border-cyber-purple/50 text-cyber-purple hover:bg-cyber-purple/10 hover:border-cyber-purple font-orbitron"
+            onClick={handleBrowseResearch}
           >
             <Zap className="mr-2 w-4 h-4" />
             Browse Research

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import BlogPost from '@/components/BlogPost';
 import CategoryFilter from '@/components/CategoryFilter';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,16 @@ import { useContentStore } from '@/hooks/useContentStore';
 const Articles = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
   const { content } = useContentStore();
+
+  // Set category from URL params on component mount
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
 
   const defaultPosts = [
     {
@@ -306,9 +316,8 @@ The edge computing revolution is making our digital world more responsive, effic
     }
   ];
 
-  // Convert uploaded content to blog post format with consistent string IDs
   const uploadedPosts = content.map(item => ({
-    id: item.id, // Keep as string ID
+    id: item.id,
     title: item.title,
     description: item.description,
     category: item.category,
@@ -324,12 +333,10 @@ The edge computing revolution is making our digital world more responsive, effic
     fileName: item.fileName,
     fileType: item.fileType,
     fileSize: item.fileSize,
-    content: item.content || item.description // Use content if available, fallback to description
+    content: item.content || item.description
   }));
 
-  // Combine uploaded content with default posts
   const allPosts = [...uploadedPosts, ...defaultPosts];
-
   const categories = [...new Set(allPosts.map(post => post.category))];
 
   const filteredPosts = allPosts.filter(post => {

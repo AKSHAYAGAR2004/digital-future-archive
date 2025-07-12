@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContentStore } from '@/hooks/useContentStore';
 import { Button } from '@/components/ui/button';
@@ -7,14 +8,16 @@ import { ArrowLeft, Calendar, Clock, Eye, Heart, MessageSquare, Share2, Trash2 }
 import DocumentViewer from '@/components/DocumentViewer';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getContentById, deleteContent } = useContentStore();
+  const { content, getContentById, deleteContent } = useContentStore();
   const { toast } = useToast();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [articleContent, setArticleContent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Default articles with full content
   const defaultArticles = [
@@ -128,16 +131,42 @@ As quantum computers become more stable and accessible, we can expect breakthrou
     }
   ];
 
-  // Try to find content in uploaded content first, then in default articles
-  const uploadedContent = id ? getContentById(id) : null;
-  const defaultContent = defaultArticles.find(article => article.id === id);
-  const content = uploadedContent || defaultContent;
+  useEffect(() => {
+    console.log('ArticleDetail - Loading article with ID:', id);
+    console.log('ArticleDetail - Available content from store:', content);
+    
+    if (!id) {
+      setIsLoading(false);
+      return;
+    }
 
-  console.log('ArticleDetail - ID:', id);
-  console.log('ArticleDetail - Content:', content);
+    // Try to find content in uploaded content first
+    const uploadedContent = getContentById(id);
+    console.log('ArticleDetail - Found uploaded content:', uploadedContent);
+    
+    if (uploadedContent) {
+      setArticleContent(uploadedContent);
+      setIsLoading(false);
+      return;
+    }
+
+    // Then try default articles
+    const defaultContent = defaultArticles.find(article => article.id === id);
+    console.log('ArticleDetail - Found default content:', defaultContent);
+    
+    if (defaultContent) {
+      setArticleContent(defaultContent);
+      setIsLoading(false);
+      return;
+    }
+
+    // If nothing found, set as null
+    setArticleContent(null);
+    setIsLoading(false);
+  }, [id, content, getContentById]);
 
   const handleDelete = () => {
-    if (uploadedContent && id) {
+    if (articleContent && id && content.find(item => item.id === id)) {
       deleteContent(id);
       toast({
         title: "Article Deleted",
@@ -147,12 +176,26 @@ As quantum computers become more stable and accessible, we can expect breakthrou
     }
   };
 
-  if (!content) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="text-xl font-orbitron text-cyber-blue">Loading article...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!articleContent) {
+    console.log('ArticleDetail - No content found for ID:', id);
     return (
       <div className="min-h-screen py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-2xl font-orbitron text-cyber-blue mb-4">Article Not Found</h1>
+            <p className="text-muted-foreground mb-4">The article you're looking for may have been moved, edited, or deleted.</p>
             <Button onClick={() => navigate('/articles')} className="cyber-button">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Articles
@@ -162,6 +205,8 @@ As quantum computers become more stable and accessible, we can expect breakthrou
       </div>
     );
   }
+
+  const isUploadedContent = content.find(item => item.id === id);
 
   return (
     <div className="min-h-screen py-8">
@@ -178,7 +223,7 @@ As quantum computers become more stable and accessible, we can expect breakthrou
           </Button>
           
           {/* Delete Button - Only show for uploaded content */}
-          {uploadedContent && (
+          {isUploadedContent && (
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="destructive" size="sm">
@@ -190,7 +235,7 @@ As quantum computers become more stable and accessible, we can expect breakthrou
                 <DialogHeader>
                   <DialogTitle>Delete Article</DialogTitle>
                   <DialogDescription>
-                    Are you sure you want to delete "{content.title}"? This action cannot be undone.
+                    Are you sure you want to delete "{articleContent.title}"? This action cannot be undone.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -211,52 +256,52 @@ As quantum computers become more stable and accessible, we can expect breakthrou
           <CardHeader>
             <div className="flex items-center justify-between mb-4">
               <Badge className={`border-0 ${
-                content.category === 'Technology' ? 'bg-cyber-blue/80' :
-                content.category === 'Research' ? 'bg-cyber-purple/80' :
-                content.category === 'Security' ? 'bg-cyber-green/80' :
+                articleContent.category === 'Technology' ? 'bg-cyber-blue/80' :
+                articleContent.category === 'Research' ? 'bg-cyber-purple/80' :
+                articleContent.category === 'Security' ? 'bg-cyber-green/80' :
                 'bg-cyber-pink/80'
               } text-white`}>
-                {content.category}
+                {articleContent.category}
               </Badge>
               <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(content.date).toLocaleDateString()}
+                  {new Date(articleContent.date).toLocaleDateString()}
                 </div>
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  {content.readTime}
+                  {articleContent.readTime}
                 </div>
               </div>
             </div>
             
             <CardTitle className="text-3xl md:text-4xl font-orbitron text-cyber-blue mb-4">
-              {content.title}
+              {articleContent.title}
             </CardTitle>
             
             <CardDescription className="text-lg font-exo text-muted-foreground mb-6">
-              {content.description}
+              {articleContent.description}
             </CardDescription>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                 <div className="flex items-center hover:text-cyber-blue transition-colors cursor-pointer">
                   <Eye className="w-4 h-4 mr-1" />
-                  {content.views}
+                  {articleContent.views}
                 </div>
                 <div className="flex items-center hover:text-cyber-pink transition-colors cursor-pointer">
                   <Heart className="w-4 h-4 mr-1" />
-                  {content.likes}
+                  {articleContent.likes}
                 </div>
                 <div className="flex items-center hover:text-cyber-green transition-colors cursor-pointer">
                   <MessageSquare className="w-4 h-4 mr-1" />
-                  {content.comments}
+                  {articleContent.comments}
                 </div>
               </div>
               
               <div className="flex items-center space-x-2">
                 <div className="text-cyber-blue font-exo text-sm">
-                  by {content.author}
+                  by {articleContent.author}
                 </div>
                 <Button variant="ghost" size="sm" className="text-cyber-blue hover:bg-cyber-blue/10 p-2">
                   <Share2 className="w-4 h-4" />
@@ -267,16 +312,16 @@ As quantum computers become more stable and accessible, we can expect breakthrou
         </Card>
 
         {/* Article Content or Document Viewer */}
-        {uploadedContent && uploadedContent.fileUrl && uploadedContent.fileName && uploadedContent.fileType && uploadedContent.fileSize ? (
+        {isUploadedContent && isUploadedContent.fileUrl && isUploadedContent.fileName && isUploadedContent.fileType && isUploadedContent.fileSize ? (
           <div className="mb-8">
             <DocumentViewer
-              fileName={uploadedContent.fileName}
-              fileType={uploadedContent.fileType}
-              fileUrl={uploadedContent.fileUrl}
-              fileSize={uploadedContent.fileSize}
+              fileName={isUploadedContent.fileName}
+              fileType={isUploadedContent.fileType}
+              fileUrl={isUploadedContent.fileUrl}
+              fileSize={isUploadedContent.fileSize}
             />
           </div>
-        ) : (content.content || (uploadedContent && uploadedContent.content)) ? (
+        ) : (articleContent.content || (isUploadedContent && isUploadedContent.content)) ? (
           <Card className="cyber-card mb-8">
             <CardContent className="pt-6">
               <div className="prose prose-invert max-w-none">
@@ -284,7 +329,7 @@ As quantum computers become more stable and accessible, we can expect breakthrou
                   className="text-foreground leading-relaxed"
                   style={{ whiteSpace: 'pre-wrap' }}
                   dangerouslySetInnerHTML={{ 
-                    __html: (content.content || uploadedContent?.content || '').replace(/\n/g, '<br/>').replace(/### /g, '<h3 class="text-xl font-orbitron text-cyber-purple mt-6 mb-3">').replace(/<\/h3>/g, '</h3>').replace(/## /g, '<h2 class="text-2xl font-orbitron text-cyber-blue mt-8 mb-4">').replace(/<\/h2>/g, '</h2>').replace(/# /g, '<h1 class="text-3xl font-orbitron text-cyber-green mt-8 mb-6">').replace(/<\/h1>/g, '</h1>')
+                    __html: (articleContent.content || isUploadedContent?.content || '').replace(/\n/g, '<br/>').replace(/### /g, '<h3 class="text-xl font-orbitron text-cyber-purple mt-6 mb-3">').replace(/<\/h3>/g, '</h3>').replace(/## /g, '<h2 class="text-2xl font-orbitron text-cyber-blue mt-8 mb-4">').replace(/<\/h2>/g, '</h2>').replace(/# /g, '<h1 class="text-3xl font-orbitron text-cyber-green mt-8 mb-6">').replace(/<\/h1>/g, '</h1>')
                   }}
                 />
               </div>
@@ -293,14 +338,14 @@ As quantum computers become more stable and accessible, we can expect breakthrou
         ) : null}
 
         {/* Tags */}
-        {content.tags && (
+        {articleContent.tags && (
           <Card className="cyber-card">
             <CardHeader>
               <CardTitle className="text-lg font-orbitron text-cyber-purple">Tags</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {content.tags.split(',').map((tag, index) => (
+                {articleContent.tags.split(',').map((tag, index) => (
                   <Badge key={index} variant="outline" className="border-cyber-blue/30 text-cyber-blue">
                     {tag.trim()}
                   </Badge>

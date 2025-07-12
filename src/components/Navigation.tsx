@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Home, FileText, Upload, User, Settings } from 'lucide-react';
+import { Search, Menu, X, Home, FileText, Upload, User, Settings, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -15,6 +14,7 @@ const Navigation = () => {
     { name: 'Articles', path: '/articles', icon: FileText },
     { name: 'Categories', path: '/categories', icon: Settings },
     { name: 'Upload', path: '/upload', icon: Upload },
+    { name: 'Assistant', path: '/assistant', icon: Bot },
     { name: 'About', path: '/about', icon: User }
   ];
 
